@@ -19,7 +19,7 @@ A full-stack calculator built for a frontend engineer technical assessment: a Go
 │   ├── models/            # request/response JSON structs
 │   ├── .air.toml          # live-reload config (see below)
 │   └── go.mod
-├── Makefile               # start-api target
+├── Makefile               # start-api, test-api targets
 └── README.md
 ```
 
@@ -84,8 +84,7 @@ curl -X POST localhost:8080/api/add -H 'Content-Type: application/json' -d '{"a"
 ## Testing & Coverage
 
 ```bash
-cd api
-go test ./... -cover
+make test-api
 ```
 
 Current coverage: **100%** on `utils` (arithmetic), **84.4%** on `handlers`.
