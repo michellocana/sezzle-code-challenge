@@ -6,7 +6,7 @@ A full-stack calculator built for a frontend engineer technical assessment: a Go
 
 - ✅ Backend (`api/`) — done
 - ✅ Frontend (`web/`) — core calculator UI done
-- ⏳ Docker — not started yet
+- ✅ Docker — done
 
 ## Project Structure
 
@@ -24,7 +24,9 @@ A full-stack calculator built for a frontend engineer technical assessment: a Go
 │   │   ├── components/       # Calculator, ThemeToggle, ThemeProvider, shadcn/ui primitives
 │   │   ├── lib/               # API client, number formatting, cn helper
 │   │   └── test/              # Vitest setup
+│   ├── nginx.conf             # serves the built SPA in the Docker image
 │   └── vite.config.ts        # includes Vitest `test` config
+├── docker-compose.yml       # runs api + web together
 ├── Makefile                 # start-api, test-api, start-web, test-web targets
 └── README.md
 ```
@@ -124,6 +126,19 @@ Runs [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-
 
 An HTML coverage report is written to `web/coverage/index.html` after each run.
 
+## Running with Docker
+
+```bash
+docker compose up --build
+```
+
+This builds and runs both services together:
+
+- **`api`** — multi-stage build (`golang:1.26.4-alpine` → `gcr.io/distroless/static-debian12:nonroot`), exposed on `http://localhost:8080`.
+- **`web`** — multi-stage build (`node:24-alpine` runs `npm run build`, then the static `dist/` output is served by `nginx:alpine`), exposed on `http://localhost:5173`.
+
+The browser talks to the API directly (not through the web container), so `ALLOWED_ORIGIN` on the `api` service is set to `http://localhost:5173` to match. Stop everything with `docker compose down`.
+
 ## Design Rationale
 
 - **gin**, per-operation REST endpoints (`/api/add`, `/api/subtract`, ...) rather than a single `/api/calculate` endpoint — keeps each handler small and single-purpose, and each is trivially testable via `net/http/httptest`.
@@ -136,3 +151,4 @@ An HTML coverage report is written to `web/coverage/index.html` after each run.
 - **Monospace font scoped to the calculator only** (`font-mono` on the `Card`), with Inter as the app-wide sans font. Digits and operators need fixed-width alignment; body/UI text (like toast messages) reads better in a proportional font.
 - **Errors surface as toasts (`sonner`), not inline alerts.** An inline error block that appears/disappears shifts the layout around it; a toast is non-blocking and doesn't lock the calculator — a failed `5 ÷ 0` leaves the operands in place so the user can fix and retry immediately, no forced reset required.
 - **Theme toggle defaults to light**, persisted to `localStorage` via a small custom `ThemeProvider` (not `next-themes`, which assumes a Next.js/SSR setup this Vite app doesn't have).
+- **Multi-stage Docker builds for both services**, so build toolchains (Go compiler, Node/npm) never ship in the final image. The API's runtime stage is `distroless/static` (no shell, no package manager, non-root) since it's a single static binary with no OS dependencies. The frontend's runtime stage is plain `nginx:alpine` serving the pre-built static `dist/`, not a Node server — there's nothing left to run server-side once Vite has bundled the SPA.
