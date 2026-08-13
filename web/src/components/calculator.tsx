@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ApiError, calculate, type Operation } from '@/lib/api'
@@ -35,13 +36,10 @@ export function Calculator() {
   const [previousValue, setPreviousValue] = useState<number | null>(null)
   const [operator, setOperator] = useState<Operation | null>(null)
   const [overwrite, setOverwrite] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const disabled = loading || error !== null
-
   function inputDigit(digit: string) {
-    if (disabled) return
+    if (loading) return
     if (overwrite) {
       setDisplay(digit)
       setOverwrite(false)
@@ -52,7 +50,7 @@ export function Calculator() {
   }
 
   function inputDecimal() {
-    if (disabled) return
+    if (loading) return
     if (overwrite) {
       setDisplay('0.')
       setOverwrite(false)
@@ -62,7 +60,7 @@ export function Calculator() {
   }
 
   function backspace() {
-    if (disabled || overwrite) return
+    if (loading || overwrite) return
     const next = display.slice(0, -1)
     setDisplay(next === '' || next === '-' ? '0' : next)
   }
@@ -72,7 +70,6 @@ export function Calculator() {
     setPreviousValue(null)
     setOperator(null)
     setOverwrite(true)
-    setError(null)
     setLoading(false)
   }
 
@@ -81,10 +78,11 @@ export function Calculator() {
     try {
       const result = await calculate(op, a, b)
       setDisplay(formatNumber(result))
-      setError(null)
       return result
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong')
+      toast.error(
+        err instanceof ApiError ? err.message : 'Something went wrong',
+      )
       return null
     } finally {
       setLoading(false)
@@ -92,7 +90,7 @@ export function Calculator() {
   }
 
   async function pressOperator(nextOperator: Operation) {
-    if (disabled) return
+    if (loading) return
 
     if (operator && previousValue !== null && !overwrite) {
       const result = await runCalculation(
@@ -111,7 +109,7 @@ export function Calculator() {
   }
 
   async function pressEquals() {
-    if (disabled || operator === null || previousValue === null) return
+    if (loading || operator === null || previousValue === null) return
     const result = await runCalculation(
       operator,
       previousValue,
@@ -124,7 +122,7 @@ export function Calculator() {
   }
 
   return (
-    <Card className="w-full max-w-xs">
+    <Card className="w-full max-w-xs font-mono">
       <CardContent className="flex flex-col gap-4">
         <div className="flex min-h-20 flex-col justify-end gap-1 rounded-lg bg-muted px-4 py-3">
           <div className="flex h-5 items-center justify-end gap-1.5 truncate text-right text-sm text-muted-foreground">
@@ -133,12 +131,10 @@ export function Calculator() {
                 <Loader2 className="size-3.5 animate-spin" />
                 <span>Calculating…</span>
               </>
-            ) : error ? (
-              <span className="text-destructive">{error}</span>
             ) : previousValue !== null && operator ? (
               `${formatNumber(previousValue)} ${OPERATOR_SYMBOLS[operator]}`
             ) : (
-              ' '
+              ' '
             )}
           </div>
           <div
@@ -160,64 +156,64 @@ export function Calculator() {
           >
             AC
           </CalcButton>
-          <CalcButton onClick={backspace} disabled={disabled || overwrite}>
+          <CalcButton onClick={backspace} disabled={loading || overwrite}>
             {'⌫'}
           </CalcButton>
           <CalcButton
             variant="outline"
             onClick={() => pressOperator('divide')}
-            disabled={disabled}
+            disabled={loading}
           >
             {OPERATOR_SYMBOLS.divide}
           </CalcButton>
 
-          <CalcButton onClick={() => inputDigit('7')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('7')} disabled={loading}>
             7
           </CalcButton>
-          <CalcButton onClick={() => inputDigit('8')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('8')} disabled={loading}>
             8
           </CalcButton>
-          <CalcButton onClick={() => inputDigit('9')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('9')} disabled={loading}>
             9
           </CalcButton>
           <CalcButton
             variant="outline"
             onClick={() => pressOperator('multiply')}
-            disabled={disabled}
+            disabled={loading}
           >
             {OPERATOR_SYMBOLS.multiply}
           </CalcButton>
 
-          <CalcButton onClick={() => inputDigit('4')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('4')} disabled={loading}>
             4
           </CalcButton>
-          <CalcButton onClick={() => inputDigit('5')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('5')} disabled={loading}>
             5
           </CalcButton>
-          <CalcButton onClick={() => inputDigit('6')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('6')} disabled={loading}>
             6
           </CalcButton>
           <CalcButton
             variant="outline"
             onClick={() => pressOperator('subtract')}
-            disabled={disabled}
+            disabled={loading}
           >
             {OPERATOR_SYMBOLS.subtract}
           </CalcButton>
 
-          <CalcButton onClick={() => inputDigit('1')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('1')} disabled={loading}>
             1
           </CalcButton>
-          <CalcButton onClick={() => inputDigit('2')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('2')} disabled={loading}>
             2
           </CalcButton>
-          <CalcButton onClick={() => inputDigit('3')} disabled={disabled}>
+          <CalcButton onClick={() => inputDigit('3')} disabled={loading}>
             3
           </CalcButton>
           <CalcButton
             variant="outline"
             onClick={() => pressOperator('add')}
-            disabled={disabled}
+            disabled={loading}
           >
             {OPERATOR_SYMBOLS.add}
           </CalcButton>
@@ -225,17 +221,17 @@ export function Calculator() {
           <CalcButton
             className="col-span-2"
             onClick={() => inputDigit('0')}
-            disabled={disabled}
+            disabled={loading}
           >
             0
           </CalcButton>
-          <CalcButton onClick={inputDecimal} disabled={disabled}>
+          <CalcButton onClick={inputDecimal} disabled={loading}>
             .
           </CalcButton>
           <CalcButton
             variant="default"
             onClick={pressEquals}
-            disabled={disabled || operator === null}
+            disabled={loading || operator === null}
           >
             =
           </CalcButton>

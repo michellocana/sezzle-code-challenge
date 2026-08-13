@@ -1,5 +1,6 @@
 import { Calculator } from '@/components/calculator'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { Toaster } from '@/components/ui/sonner'
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
         <ThemeToggle />
       </div>
       <Calculator />
+      <Toaster />
     </div>
   )
 }
