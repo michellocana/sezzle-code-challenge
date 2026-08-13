@@ -125,7 +125,10 @@ export function Calculator() {
     <Card className="w-full max-w-xs font-mono">
       <CardContent className="flex flex-col gap-4">
         <div className="flex min-h-20 flex-col justify-end gap-1 rounded-lg bg-muted px-4 py-3">
-          <div className="flex h-5 items-center justify-end gap-1.5 truncate text-right text-sm text-muted-foreground">
+          <div
+            data-testid="calculator-hint"
+            className="flex h-5 items-center justify-end gap-1.5 truncate text-right text-sm text-muted-foreground"
+          >
             {loading ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" />
@@ -138,6 +141,7 @@ export function Calculator() {
             )}
           </div>
           <div
+            data-testid="calculator-display"
             className={cn(
               'truncate text-right text-4xl font-semibold tabular-nums',
               loading && 'animate-pulse',
