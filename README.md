@@ -60,6 +60,20 @@ make start-web
 
 Vite dev server runs on `http://localhost:5173` by default. It expects the backend at `http://localhost:8080`; override with the `VITE_API_URL` env var (e.g. in `web/.env.local`) if the API runs elsewhere.
 
+### Keyboard shortcuts
+
+The calculator responds to a global `keydown` listener, so it works without clicking any buttons:
+
+| Key(s) | Action |
+|---|---|
+| `0`–`9` | digit entry |
+| `.` or `,` | decimal point |
+| `+` `-` `*` `/` | operators |
+| `Enter` or `=` | calculate |
+| `Backspace` or `Escape` | clear everything (same as `AC`) |
+
+Note the on-screen `⌫` button behaves differently — it deletes one character at a time — while the `Backspace` key clears the whole calculator.
+
 ## API Reference
 
 All endpoints accept `POST` with a JSON body `{"a": <number>, "b": <number>}` and return `200 OK` with `{"result": <number>}` on success.
@@ -122,7 +136,9 @@ go tool cover -html=coverage.out
 make test-web
 ```
 
-Runs [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-library.com/react) (`vitest run --coverage`), covering the API client, number formatting, theme provider/toggle, and the calculator's UI logic (digit entry, chained operations, loading state, and error handling) end-to-end against a mocked API.
+Runs [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-library.com/react) (`vitest run --coverage`), covering the API client, number formatting, theme provider/toggle, and the calculator's UI logic (digit entry, keyboard shortcuts, chained operations, loading state, and error handling) end-to-end against a mocked API.
+
+Current coverage: **~89%** statements, **~95%** lines.
 
 An HTML coverage report is written to `web/coverage/index.html` after each run.
 
@@ -152,3 +168,4 @@ The browser talks to the API directly (not through the web container), so `ALLOW
 - **Errors surface as toasts (`sonner`), not inline alerts.** An inline error block that appears/disappears shifts the layout around it; a toast is non-blocking and doesn't lock the calculator — a failed `5 ÷ 0` leaves the operands in place so the user can fix and retry immediately, no forced reset required.
 - **Theme toggle defaults to light**, persisted to `localStorage` via a small custom `ThemeProvider` (not `next-themes`, which assumes a Next.js/SSR setup this Vite app doesn't have).
 - **Multi-stage Docker builds for both services**, so build toolchains (Go compiler, Node/npm) never ship in the final image. The API's runtime stage is `distroless/static` (no shell, no package manager, non-root) since it's a single static binary with no OS dependencies. The frontend's runtime stage is plain `nginx:alpine` serving the pre-built static `dist/`, not a Node server — there's nothing left to run server-side once Vite has bundled the SPA.
+- **Keyboard input is a single global `keydown` listener**, not per-key-focused inputs — there's nothing else on the page competing for keyboard focus, so it maps keys straight onto the same handlers the on-screen buttons call. The keyboard `Backspace` clears everything (matches a physical calculator's expectation of "start over"), which is deliberately different from the on-screen `⌫` button's per-character delete.
