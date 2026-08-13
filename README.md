@@ -2,6 +2,10 @@
 
 A full-stack calculator built for a frontend engineer technical assessment: a Go REST API performing arithmetic, consumed by a React frontend.
 
+## Development Process
+
+This project was built iteratively with [Claude Code](https://claude.com/claude-code) as an AI pair-programmer, one incremental feature/review pass at a time rather than a single generated dump. The full session transcript — every prompt, decision, and follow-up correction — is in [`PROMPT.md`](./PROMPT.md), included for transparency into how the codebase evolved and the reasoning behind the choices documented below.
+
 ## Status
 
 - ✅ Backend (`api/`) — done
