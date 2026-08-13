@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -120,6 +120,47 @@ export function Calculator() {
     setOperator(null)
     setOverwrite(true)
   }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key >= '0' && event.key <= '9') {
+        inputDigit(event.key)
+        return
+      }
+
+      switch (event.key) {
+        case '.':
+        case ',':
+          inputDecimal()
+          break
+        case '+':
+          pressOperator('add')
+          break
+        case '-':
+          pressOperator('subtract')
+          break
+        case '*':
+          pressOperator('multiply')
+          break
+        case '/':
+          event.preventDefault()
+          pressOperator('divide')
+          break
+        case 'Enter':
+        case '=':
+          event.preventDefault()
+          pressEquals()
+          break
+        case 'Backspace':
+        case 'Escape':
+          clear()
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [display, previousValue, operator, overwrite, loading])
 
   return (
     <Card className="w-full max-w-xs font-mono">

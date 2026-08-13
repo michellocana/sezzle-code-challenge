@@ -229,4 +229,69 @@ describe('Calculator', () => {
       expect(toast.error).toHaveBeenCalledWith('Something went wrong'),
     )
   })
+
+  it('supports full keyboard entry: digits, operators, and Enter to calculate', async () => {
+    mockedCalculate.mockResolvedValueOnce(2)
+    const user = userEvent.setup()
+    render(<Calculator />)
+
+    await user.keyboard('1+1{Enter}')
+
+    await waitFor(() => expect(display()).toHaveTextContent('2'))
+    expect(mockedCalculate).toHaveBeenCalledWith('add', 1, 1)
+  })
+
+  it('supports keyboard shortcuts for subtract, multiply and divide', async () => {
+    const user = userEvent.setup()
+    render(<Calculator />)
+
+    await user.keyboard('9-')
+    expect(hint()).toHaveTextContent('9 −')
+
+    await user.keyboard('{Escape}9*')
+    expect(hint()).toHaveTextContent('9 ×')
+
+    await user.keyboard('{Escape}9/')
+    expect(hint()).toHaveTextContent('9 ÷')
+  })
+
+  it('supports the decimal point key', async () => {
+    const user = userEvent.setup()
+    render(<Calculator />)
+
+    await user.keyboard('1.5')
+
+    expect(display()).toHaveTextContent('1.5')
+  })
+
+  it('treats comma as a decimal separator too', async () => {
+    const user = userEvent.setup()
+    render(<Calculator />)
+
+    await user.keyboard('1,5')
+
+    expect(display()).toHaveTextContent('1.5')
+  })
+
+  it('the Backspace key clears the calculator, same as AC', async () => {
+    const user = userEvent.setup()
+    render(<Calculator />)
+
+    await user.keyboard('12')
+    expect(display()).toHaveTextContent('12')
+
+    await user.keyboard('{Backspace}')
+
+    expect(display()).toHaveTextContent('0')
+  })
+
+  it('the Escape key clears the calculator, same as AC', async () => {
+    const user = userEvent.setup()
+    render(<Calculator />)
+
+    await user.keyboard('12')
+    await user.keyboard('{Escape}')
+
+    expect(display()).toHaveTextContent('0')
+  })
 })
