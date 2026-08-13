@@ -7,7 +7,7 @@ import (
 )
 
 // ErrDivideByZero is returned by Divide when the divisor is zero.
-var ErrDivideByZero = errors.New("cannot divide by zero")
+var ErrDivideByZero = errors.New("Cannot divide by zero")
 
 func Add(a, b decimal.Decimal) decimal.Decimal {
 	return a.Add(b)
