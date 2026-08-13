@@ -5,16 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 
 	"sezzle-code-challenge/api/models"
 	"sezzle-code-challenge/api/utils"
 )
 
-func bindOperands(c *gin.Context) (a, b float64, ok bool) {
+func bindOperands(c *gin.Context) (a, b decimal.Decimal, ok bool) {
 	var req models.OperationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{Error: "invalid request: expected numeric fields \"a\" and \"b\""})
-		return 0, 0, false
+		return decimal.Decimal{}, decimal.Decimal{}, false
 	}
 	return *req.A, *req.B, true
 }
@@ -24,7 +25,8 @@ func Add(c *gin.Context) {
 	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, models.OperationResponse{Result: utils.Add(a, b)})
+	result, _ := utils.Add(a, b).Float64()
+	c.JSON(http.StatusOK, models.OperationResponse{Result: result})
 }
 
 func Subtract(c *gin.Context) {
@@ -32,7 +34,8 @@ func Subtract(c *gin.Context) {
 	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, models.OperationResponse{Result: utils.Subtract(a, b)})
+	result, _ := utils.Subtract(a, b).Float64()
+	c.JSON(http.StatusOK, models.OperationResponse{Result: result})
 }
 
 func Multiply(c *gin.Context) {
@@ -40,7 +43,8 @@ func Multiply(c *gin.Context) {
 	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, models.OperationResponse{Result: utils.Multiply(a, b)})
+	result, _ := utils.Multiply(a, b).Float64()
+	c.JSON(http.StatusOK, models.OperationResponse{Result: result})
 }
 
 func Divide(c *gin.Context) {
@@ -48,7 +52,7 @@ func Divide(c *gin.Context) {
 	if !ok {
 		return
 	}
-	result, err := utils.Divide(a, b)
+	quotient, err := utils.Divide(a, b)
 	if err != nil {
 		if errors.Is(err, utils.ErrDivideByZero) {
 			c.JSON(http.StatusBadRequest, models.ErrorResponse{Error: err.Error()})
@@ -57,5 +61,6 @@ func Divide(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "internal error"})
 		return
 	}
+	result, _ := quotient.Float64()
 	c.JSON(http.StatusOK, models.OperationResponse{Result: result})
 }

@@ -52,6 +52,21 @@ func TestAddHandler(t *testing.T) {
 	}
 }
 
+func TestAddHandlerFloatPrecision(t *testing.T) {
+	router := newRouter()
+	req := httptest.NewRequest(http.MethodPost, "/api/add", bytes.NewBufferString(`{"a": 0.1, "b": 0.2}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", w.Code, http.StatusOK)
+	}
+	if got := w.Body.String(); got != `{"result":0.3}` {
+		t.Errorf("body = %s, want {\"result\":0.3}", got)
+	}
+}
+
 func TestSubtractHandler(t *testing.T) {
 	router := newRouter()
 	w := doRequest(t, router, "/api/subtract", map[string]float64{"a": 5, "b": 3})
