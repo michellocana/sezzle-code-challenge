@@ -1,9 +1,13 @@
-import { Button } from '@/components/ui/button'
+import { Calculator } from '@/components/calculator'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 function App() {
   return (
-    <div className="flex min-h-svh items-center justify-center">
-      <Button>Click me</Button>
+    <div className="relative flex min-h-svh items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <Calculator />
     </div>
   )
 }
