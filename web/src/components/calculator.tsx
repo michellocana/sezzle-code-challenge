@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ApiError, calculate, type Operation } from '@/lib/api'
@@ -126,8 +127,13 @@ export function Calculator() {
     <Card className="w-full max-w-xs">
       <CardContent className="flex flex-col gap-4">
         <div className="flex min-h-20 flex-col justify-end gap-1 rounded-lg bg-muted px-4 py-3">
-          <div className="h-5 truncate text-right text-sm text-muted-foreground">
-            {error ? (
+          <div className="flex h-5 items-center justify-end gap-1.5 truncate text-right text-sm text-muted-foreground">
+            {loading ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                <span>Calculating…</span>
+              </>
+            ) : error ? (
               <span className="text-destructive">{error}</span>
             ) : previousValue !== null && operator ? (
               `${formatNumber(previousValue)} ${OPERATOR_SYMBOLS[operator]}`
@@ -135,7 +141,12 @@ export function Calculator() {
               ' '
             )}
           </div>
-          <div className="truncate text-right text-4xl font-semibold tabular-nums">
+          <div
+            className={cn(
+              'truncate text-right text-4xl font-semibold tabular-nums',
+              loading && 'animate-pulse',
+            )}
+          >
             {display}
           </div>
         </div>
