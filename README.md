@@ -12,6 +12,16 @@ This project was built iteratively with [Claude Code](https://claude.com/claude-
 - ✅ Frontend (`web/`) — core calculator UI done
 - ✅ Docker — done
 
+## Screenshots
+
+| Light theme | Dark theme |
+|---|---|
+| ![Calculator in light theme](screenshots/calculator.png) | ![Calculator in dark theme, mid-expression](screenshots/dark-theme.png) |
+
+| Backend-validated error | Network error |
+|---|---|
+| ![Toast showing "Cannot divide by zero"](screenshots/divide-by-zero.png) | ![Toast showing "Unable to reach the calculator service"](screenshots/error.png) |
+
 ## Project Structure
 
 ```
