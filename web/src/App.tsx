@@ -9,7 +9,7 @@ function App() {
         <ThemeToggle />
       </div>
       <Calculator />
-      <Toaster />
+      <Toaster position="bottom-center" />
     </div>
   )
 }
